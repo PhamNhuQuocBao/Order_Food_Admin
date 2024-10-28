@@ -1,7 +1,6 @@
 // restautant type
 export interface RestautantResponse extends RestaurantRequest {
   _id: string;
-  ownerId: string; // Reference to Users collection (restaurant_owner)
   menu: [
     {
       itemId: string;
@@ -23,6 +22,7 @@ export interface RestaurantRequest {
     street: string;
     city: string;
   };
+  ownerId: string;
 }
 
 export type FieldTypeRestaurant = RestaurantRequest;
@@ -46,3 +46,17 @@ export interface UserResponse extends UserRequest {
 }
 
 export type FieldTypeUser = UserRequest;
+
+// Menu types
+export interface MenuRequest {
+  name: string;
+  description: string;
+  price: number;
+  category: string; // hard code o FE
+  amount: number;
+}
+
+export interface MenuResponse extends MenuRequest {
+  _id: string;
+  __v?: number;
+}

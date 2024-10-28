@@ -24,6 +24,17 @@ export const getRestaurantById = async (id: string) => {
   }
 };
 
+export const getRestaurantByOwnerId = async (id: string) => {
+  try {
+    const res = await APIs.get(`${ENDPOINT.RESTAURANT.OWNER}/${id}`);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const createRestaurant = async (data: RestaurantRequest) => {
   try {
     const res = await APIs.post(ENDPOINT.RESTAURANT.BASE, data);

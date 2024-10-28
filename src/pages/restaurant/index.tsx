@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TableRestaurant from "../../components/molecule/table/restaurant";
 import { Header } from "antd/es/layout/layout";
-import { Button, Form, Input, Modal, Typography } from "antd";
+import { Button, Form, Input, message, Modal, Typography } from "antd";
 import {
   FieldTypeRestaurant,
   RestaurantRequest,
@@ -10,7 +10,7 @@ import {
 import {
   createRestaurant,
   deleteRestaurant,
-  getRestaurants,
+  getRestaurantByOwnerId,
   updateRestaurant,
 } from "../../services/restaurant";
 import { columnsRestaurant as CLRES } from "../../constants/columns";
@@ -22,6 +22,9 @@ const MenuRestaurant = () => {
   const [formAdd] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const ref = useRef({ selectedId: "" });
+  const [messageApi, contextHolder] = message.useMessage();
+
+  console.log("render");
 
   const toggleModal = useCallback(() => {
     setIsOpenModal((prev) => !prev);
@@ -51,12 +54,19 @@ const MenuRestaurant = () => {
     const data = await formAdd.getFieldsValue();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { street, city, ...rest } = data;
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      messageApi.error("Something went wrong!");
+      return;
+    }
+
     const dataFormatted: RestaurantRequest = {
       ...rest,
       address: {
         street: data.street,
         city: data.city,
       },
+      ownerId: JSON.parse(userData)._id,
     };
 
     const res = await createRestaurant(dataFormatted);
@@ -67,8 +77,8 @@ const MenuRestaurant = () => {
   }, [toggleModal]);
 
   const handleDelete = useCallback(async (id: string) => {
-    const res = await deleteRestaurant(id);
-    console.log(res);
+    await deleteRestaurant(id);
+
     fetch();
   }, []);
 
@@ -85,20 +95,24 @@ const MenuRestaurant = () => {
     };
     console.log(dataFormatted);
 
-    const res = await updateRestaurant(ref.current.selectedId, dataFormatted);
-    console.log(res);
+    await updateRestaurant(ref.current.selectedId, dataFormatted);
+
     toggleModalUpdate();
     fetch();
-  }, [formUpdate]);
-
-  const columnsRestaurant = useMemo(() => {
-    console.log("here");
-
-    return CLRES(handleDelete, toggleModalUpdate);
   }, []);
 
+  const columnsRestaurant = useMemo(() => {
+    return CLRES(handleDelete, toggleModalUpdate);
+  }, [handleDelete, toggleModalUpdate]);
+
   const fetch = useCallback(async () => {
-    const res = await getRestaurants();
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      messageApi.error("Something went wrong!");
+      return;
+    }
+    const res = await getRestaurantByOwnerId(JSON.parse(userData)._id);
+
     setRestaurants(res.data);
   }, []);
 
@@ -107,117 +121,118 @@ const MenuRestaurant = () => {
   }, []);
 
   return (
-    <div>
-      <Header className="flex justify-between bg-white px-0">
-        <Typography.Title className="text-left">Restaurants</Typography.Title>
-        <Button type="primary" onClick={toggleModal}>
-          Add new
-        </Button>
-      </Header>
-      <TableRestaurant columns={columnsRestaurant} dataSource={restaurants} />
-      {/* form add  */}
-      <Modal open={isOpenModal} onCancel={toggleModal} onOk={submit}>
-        <Form
-          name="formAdd"
-          layout="vertical"
-          form={formAdd}
-          // labelCol={{ span: 8 }}
-          // wrapperCol={{ span: 16 }}
-          // style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          // onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
-          autoComplete="off"
+    <>
+      {contextHolder}
+      <div>
+        <Header className="flex justify-between bg-white px-0">
+          <Typography.Title className="text-left">Restaurants</Typography.Title>
+          <Button type="primary" onClick={toggleModal}>
+            Add new
+          </Button>
+        </Header>
+        <TableRestaurant columns={columnsRestaurant} dataSource={restaurants} />
+        {/* form add  */}
+        <Modal open={isOpenModal} onCancel={toggleModal} onOk={submit}>
+          <Form
+            name="formAdd"
+            layout="vertical"
+            form={formAdd}
+            // labelCol={{ span: 8 }}
+            // wrapperCol={{ span: 16 }}
+            // style={{ maxWidth: 600 }}
+            initialValues={{ remember: true }}
+            // onFinish={onFinish}
+            // onFinishFailed={onFinishFailed}
+            autoComplete="off"
+          >
+            <Form.Item<FieldTypeRestaurant>
+              label="Name"
+              name="name"
+              rules={[
+                { required: true, message: "Please input restaurant name!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item<FieldTypeRestaurant>
+              label="Phone"
+              name="phone"
+              rules={[
+                { required: true, message: "Please input phone number!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Street"
+              name="street"
+              rules={[{ required: true, message: "Please input street!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="City"
+              name="city"
+              rules={[{ required: true, message: "Please input city!" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Form>
+        </Modal>
+        {/* form update  */}
+        <Modal
+          open={isOpenModalUpdate}
+          onCancel={() => toggleModalUpdate()}
+          onOk={handleUpdate}
         >
-          <Form.Item<FieldTypeRestaurant>
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please input restaurant name!" },
-            ]}
+          <Form
+            name="formUpdate"
+            layout="vertical"
+            form={formUpdate}
+            autoComplete="off"
           >
-            <Input />
-          </Form.Item>
+            <Form.Item<FieldTypeRestaurant>
+              label="Name"
+              name="name"
+              rules={[
+                { required: true, message: "Please input restaurant name!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item<FieldTypeRestaurant>
-            label="Phone"
-            name="phone"
-            rules={[{ required: true, message: "Please input phone number!" }]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item<FieldTypeRestaurant>
+              label="Phone"
+              name="phone"
+              rules={[
+                { required: true, message: "Please input phone number!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            label="Street"
-            name="street"
-            rules={[{ required: true, message: "Please input street!" }]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item
+              label="Street"
+              name="street"
+              rules={[{ required: true, message: "Please input street!" }]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            label="City"
-            name="city"
-            rules={[{ required: true, message: "Please input city!" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-      {/* form update  */}
-      <Modal
-        open={isOpenModalUpdate}
-        onCancel={() => toggleModalUpdate()}
-        onOk={handleUpdate}
-      >
-        <Form
-          name="formUpdate"
-          layout="vertical"
-          form={formUpdate}
-          // labelCol={{ span: 8 }}
-          // wrapperCol={{ span: 16 }}
-          // style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          // onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item<FieldTypeRestaurant>
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please input restaurant name!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item<FieldTypeRestaurant>
-            label="Phone"
-            name="phone"
-            rules={[{ required: true, message: "Please input phone number!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Street"
-            name="street"
-            rules={[{ required: true, message: "Please input street!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="City"
-            name="city"
-            rules={[{ required: true, message: "Please input city!" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+            <Form.Item
+              label="City"
+              name="city"
+              rules={[{ required: true, message: "Please input city!" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    </>
   );
 };
 

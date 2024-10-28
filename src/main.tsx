@@ -8,6 +8,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MenuRestaurant from "./pages/restaurant/index.tsx";
 import FoodMenu from "./pages/foodMenu/index.tsx";
 import Login from "./pages/auth/login/index.tsx";
+import DetailMenu from "./pages/detailMenu/index.tsx";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       {
         path: "food-menu",
         element: <FoodMenu />,
+        children: [{ path: ":id", element: <DetailMenu /> }],
       },
     ],
   },

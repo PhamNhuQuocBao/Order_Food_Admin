@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   AppstoreOutlined,
   PicLeftOutlined,
@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Dropdown, Input, Layout, Menu, theme } from "antd";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 const { Content, Footer, Sider } = Layout;
 
@@ -40,27 +40,45 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const navigate = useNavigate();
 
-  const itemsAvatar: MenuProps["items"] = useMemo(
-    () => [
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  }, []);
+
+  const handleLogin = useCallback(() => {
+    navigate("login");
+  }, []);
+
+  const itemsAvatar: MenuProps["items"] = useMemo(() => {
+    const userData = localStorage.getItem("user");
+
+    return [
       {
         key: "1",
-        label: <Link to={"/login"}>Log in</Link>,
+        label: userData ? (
+          <p onClick={handleLogout}>Logout</p>
+        ) : (
+          <p onClick={handleLogin}>Login</p>
+        ),
       },
-    ],
-    [],
-  );
+    ];
+  }, []);
+
+  const userData = localStorage.getItem("user");
+
+  if (!userData) {
+    navigate("/login", {
+      replace: true,
+    });
+  }
 
   return (
     <Layout hasSider>
       <Sider style={siderStyle}>
         <div className="demo-logo-vertical" />
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={["4"]}
-          items={items}
-        />
+        <Menu theme="dark" mode="inline" items={items} />
       </Sider>
       <Layout style={{ marginInlineStart: 200 }}>
         <div className="flex items-center justify-between bg-white p-4">
