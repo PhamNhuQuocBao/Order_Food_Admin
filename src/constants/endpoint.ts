@@ -7,4 +7,8 @@ export const ENDPOINT = {
     LOGIN: "/login",
     RESGISTER: "/register",
   },
+  MENU: {
+    BASE: "/menus",
+    OWNER: "/restaurant-menus",
+  },
 };

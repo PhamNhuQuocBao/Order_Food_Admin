@@ -23,7 +23,7 @@ const router = createBrowserRouter([
       {
         path: "food-menu",
         element: <FoodMenu />,
-        children: [{ path: ":id", element: <DetailMenu /> }],
+        children: [{ path: ":restaurantId", element: <DetailMenu /> }],
       },
     ],
   },

@@ -24,8 +24,6 @@ const MenuRestaurant = () => {
   const ref = useRef({ selectedId: "" });
   const [messageApi, contextHolder] = message.useMessage();
 
-  console.log("render");
-
   const toggleModal = useCallback(() => {
     setIsOpenModal((prev) => !prev);
   }, []);
