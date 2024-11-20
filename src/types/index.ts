@@ -1,17 +1,7 @@
 // restautant type
 export interface RestautantResponse extends RestaurantRequest {
   _id: string;
-  menu: [
-    {
-      itemId: string;
-      name: string;
-      description: string;
-      price: number;
-      category: string;
-      available: boolean;
-    },
-  ];
-  rating: number;
+  __v: number;
   createdAt?: Date;
 }
 
@@ -22,6 +12,8 @@ export interface RestaurantRequest {
     street: string;
     city: string;
   };
+  image: string;
+  rating: number;
   ownerId: string;
 }
 
@@ -53,7 +45,8 @@ export interface MenuRequest {
   description: string;
   price: number;
   category: string; // hard code o FE
-  amount: number;
+  size?: string[];
+  image: string;
 }
 
 export interface MenuResponse extends MenuRequest {

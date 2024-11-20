@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TableRestaurant from "../../components/molecule/table/restaurant";
 import { Header } from "antd/es/layout/layout";
-import { Button, Form, Input, message, Modal, Typography } from "antd";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  message,
+  Modal,
+  Select,
+  Typography,
+} from "antd";
 import {
   FieldTypeRestaurant,
   RestaurantRequest,
@@ -14,11 +23,14 @@ import {
   updateRestaurant,
 } from "../../services/restaurant";
 import { columnsRestaurant as CLRES } from "../../constants/columns";
+import Upload from "../../components/molecule/upload";
+import { RATING } from "../../constants";
 
 const MenuRestaurant = () => {
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [isOpenModalUpdate, setIsOpenModalUpdate] = useState<boolean>(false);
   const [restaurants, setRestaurants] = useState<RestautantResponse[]>([]);
+  const [image, setImage] = useState<string>("");
   const [formAdd] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const ref = useRef({ selectedId: "" });
@@ -26,20 +38,24 @@ const MenuRestaurant = () => {
 
   const toggleModal = useCallback(() => {
     setIsOpenModal((prev) => !prev);
+    formAdd.resetFields();
   }, []);
 
   const toggleModalUpdate = useCallback(
     async (record?: RestautantResponse) => {
       setIsOpenModalUpdate((prev) => !prev);
+      formUpdate.resetFields();
 
       if (!record) {
         return;
       }
+      setImage(record.image);
 
       formUpdate.setFieldsValue({
         ...record,
         street: record?.address.street,
         city: record?.address.city,
+        image: record.image,
       });
 
       ref.current.selectedId = record?._id;
@@ -64,15 +80,16 @@ const MenuRestaurant = () => {
         street: data.street,
         city: data.city,
       },
+      image: image,
       ownerId: JSON.parse(userData)._id,
     };
 
-    const res = await createRestaurant(dataFormatted);
-    console.log(res);
+    console.log(dataFormatted);
 
+    await createRestaurant(dataFormatted);
     toggleModal();
     fetch();
-  }, [toggleModal]);
+  }, [formAdd, image, messageApi, toggleModal]);
 
   const handleDelete = useCallback(async (id: string) => {
     await deleteRestaurant(id);
@@ -90,14 +107,13 @@ const MenuRestaurant = () => {
         street: data.street,
         city: data.city,
       },
+      image: image,
     };
-    console.log(dataFormatted);
 
     await updateRestaurant(ref.current.selectedId, dataFormatted);
-
     toggleModalUpdate();
     fetch();
-  }, []);
+  }, [formUpdate, image, toggleModalUpdate]);
 
   const columnsRestaurant = useMemo(() => {
     return CLRES(handleDelete, toggleModalUpdate);
@@ -135,12 +151,7 @@ const MenuRestaurant = () => {
             name="formAdd"
             layout="vertical"
             form={formAdd}
-            // labelCol={{ span: 8 }}
-            // wrapperCol={{ span: 16 }}
-            // style={{ maxWidth: 600 }}
             initialValues={{ remember: true }}
-            // onFinish={onFinish}
-            // onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
             <Form.Item<FieldTypeRestaurant>
@@ -178,6 +189,21 @@ const MenuRestaurant = () => {
             >
               <Input />
             </Form.Item>
+            <Form.Item<FieldTypeRestaurant>
+              label="Rating"
+              name="rating"
+              rules={[{ required: true, message: "Please input city!" }]}
+            >
+              <Select options={RATING} />
+            </Form.Item>
+            <Form.Item<FieldTypeRestaurant>
+              label="Image"
+              name="image"
+              rules={[{ required: true, message: "Please input city!" }]}
+            >
+              <Upload handleChange={(url) => setImage(url)} />
+            </Form.Item>
+            {image && <Image src={image} width={200} />}
           </Form>
         </Modal>
         {/* form update  */}
@@ -227,6 +253,14 @@ const MenuRestaurant = () => {
             >
               <Input />
             </Form.Item>
+            <Form.Item<FieldTypeRestaurant>
+              label="Image"
+              name="image"
+              rules={[{ required: true, message: "Please input city!" }]}
+            >
+              <Upload handleChange={(url) => setImage(url)} />
+            </Form.Item>
+            {image && <Image src={image} width={200} />}
           </Form>
         </Modal>
       </div>

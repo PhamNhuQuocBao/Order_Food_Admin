@@ -11,6 +11,7 @@ import { MenuRequest, MenuResponse } from "../../types";
 import {
   Button,
   Form,
+  Image,
   Input,
   InputNumber,
   message,
@@ -25,12 +26,14 @@ import {
   getMenuByRestaurantId,
   updateMenu,
 } from "../../services/menu";
+import Upload from "../../components/molecule/upload";
 
 const DetailMenu = () => {
   const [menu, setMenu] = useState<MenuResponse[]>([]);
   const ref = useRef({ selectedId: "" });
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [isOpenModalUpdate, setIsOpenModalUpdate] = useState<boolean>(false);
+  const [image, setImage] = useState<string>("");
   const [formAdd] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const { restaurantId } = useParams();
@@ -47,8 +50,10 @@ const DetailMenu = () => {
         return;
       }
 
+      setImage(record.image);
       formUpdate.setFieldsValue({
         ...record,
+        image: record.image,
       });
 
       ref.current.selectedId = record?._id;
@@ -69,7 +74,12 @@ const DetailMenu = () => {
 
   const submit = useCallback(async () => {
     const dataForm = await formAdd.getFieldsValue();
-    const res = await createMenu({ ...dataForm, restaurantId: restaurantId });
+
+    const res = await createMenu({
+      ...dataForm,
+      restaurantId: restaurantId,
+      image: image,
+    });
     if (res.status === 200) {
       message.success("add success");
       toggleModal();
@@ -78,11 +88,14 @@ const DetailMenu = () => {
     } else {
       message.error("add fail");
     }
-  }, [fetch, formAdd, restaurantId, toggleModal]);
+  }, [fetch, formAdd, image, restaurantId, toggleModal]);
 
   const handleUpdate = useCallback(async () => {
     const data = await formUpdate.getFieldsValue();
-    const res = await updateMenu(ref.current.selectedId, data);
+    const res = await updateMenu(ref.current.selectedId, {
+      ...data,
+      image: image,
+    });
     if (res.status === 200) {
       message.success("update success");
       toggleModalUpdate();
@@ -90,7 +103,7 @@ const DetailMenu = () => {
     } else {
       message.error("update fail");
     }
-  }, [fetch, formUpdate, toggleModalUpdate]);
+  }, [fetch, formUpdate, image, toggleModalUpdate]);
 
   const handleDelete = useCallback(async (id: string) => {
     const res = await deleteMenu(id);
@@ -139,18 +152,21 @@ const DetailMenu = () => {
             <Input />
           </Form.Item>
           <Form.Item<MenuRequest>
-            name="amount"
-            label="Amount"
-            rules={[{ required: true, message: "Please input price item!" }]}
-          >
-            <InputNumber min={0} defaultValue={1} />
-          </Form.Item>
-          <Form.Item<MenuRequest>
             name="price"
             label="Price $"
             rules={[{ required: true, message: "Please input price item!" }]}
           >
             <InputNumber min={0} defaultValue={0} />
+          </Form.Item>
+          <Form.Item<MenuRequest> name="size" label="Size">
+            <Select
+              mode="multiple"
+              options={[
+                { value: "small", label: "Small" },
+                { value: "middle", label: "Middle" },
+                { value: "large", label: "Large" },
+              ]}
+            />
           </Form.Item>
           <Form.Item<MenuRequest>
             name="category"
@@ -166,6 +182,14 @@ const DetailMenu = () => {
               ]}
             />
           </Form.Item>
+          <Form.Item<MenuRequest>
+            label="Image"
+            name="image"
+            rules={[{ required: true, message: "Please input city!" }]}
+          >
+            <Upload handleChange={(url) => setImage(url)} />
+          </Form.Item>
+          {image && <Image src={image} width={200} />}
         </Form>
       </Modal>
       {/* modal update  */}
@@ -192,18 +216,21 @@ const DetailMenu = () => {
             <Input />
           </Form.Item>
           <Form.Item<MenuRequest>
-            name="amount"
-            label="Amount"
-            rules={[{ required: true, message: "Please input price item!" }]}
-          >
-            <InputNumber min={0} defaultValue={1} />
-          </Form.Item>
-          <Form.Item<MenuRequest>
             name="price"
             label="Price $"
             rules={[{ required: true, message: "Please input price item!" }]}
           >
             <InputNumber min={0} defaultValue={0} />
+          </Form.Item>
+          <Form.Item<MenuRequest> name="size" label="Size">
+            <Select
+              mode="multiple"
+              options={[
+                { value: "small", label: "Small" },
+                { value: "middle", label: "Middle" },
+                { value: "large", label: "Large" },
+              ]}
+            />
           </Form.Item>
           <Form.Item<MenuRequest>
             name="category"
@@ -219,6 +246,14 @@ const DetailMenu = () => {
               ]}
             />
           </Form.Item>
+          <Form.Item<MenuRequest>
+            label="Image"
+            name="image"
+            rules={[{ required: true, message: "Please input city!" }]}
+          >
+            <Upload handleChange={(url) => setImage(url)} />
+          </Form.Item>
+          {image && <Image src={image} width={200} />}
         </Form>
       </Modal>
     </div>

@@ -1,4 +1,4 @@
-import { Popconfirm, TableColumnsType } from "antd";
+import { Image, Popconfirm, TableColumnsType } from "antd";
 import { MenuResponse, RestautantResponse } from "../types";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
@@ -24,6 +24,11 @@ export const columnsRestaurant = (
         {record.address.street}, {record.address.city}
       </p>
     ),
+  },
+  {
+    title: "Image",
+    dataIndex: "image",
+    render: (_, record) => <Image width={100} src={record.image} preview />,
   },
   {
     title: "Action",
