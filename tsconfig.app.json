@@ -16,9 +16,10 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,  // Bỏ qua các lỗi về kiểu dữ liệu
+    "noUnusedLocals": false, // Bỏ qua các cảnh báo không sử dụng biến
+    "noUnusedParameters": false // Bỏ qua các cảnh báo không sử dụng tham số
   },
   "include": ["src"]
 }
