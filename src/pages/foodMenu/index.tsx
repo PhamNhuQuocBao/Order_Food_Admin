@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Layout, Menu, MenuProps, message } from "antd";
 import { Content } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
