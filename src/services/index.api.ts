@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const APIs = axios.create({
-  baseURL: "http://localhost:6789",
-  timeout: 3000,
+  baseURL: import.meta.env.VITE_API_URL,
+  timeout: 10000,
 });
 
 export const cloudinaryConfig = {
