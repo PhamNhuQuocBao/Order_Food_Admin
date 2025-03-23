@@ -1,3 +1,5 @@
+/* @ts-ignore */
+
 // restautant type
 export interface RestautantResponse extends RestaurantRequest {
   _id: string;
