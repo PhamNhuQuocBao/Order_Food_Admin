@@ -1,7 +1,7 @@
 import { Layout, Menu, MenuProps, message } from "antd";
 import { Content } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { getRestaurantByOwnerId } from "../../services/restaurant";
 import { RestautantResponse } from "../../types";

@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { columnsMenu as CLMN } from "../../constants/columns";
 import TableMenu from "../../components/molecule/table/menu";
 import { MenuRequest, MenuResponse } from "../../types";
